@@ -15,6 +15,7 @@ import random
 import os
 from io import open as iopen
 import sys
+import youtube_dl
 
 '''Globals/Metadata'''
 
@@ -52,12 +53,16 @@ def dl_content(url, source, title):
         img_url = url.replace('.gifv', '.mp4')
         return img_url, title
 
+    elif source == 'youtube.com':
+        get_yt(url)
+
     else:
         return url, title
 
 def handle_url(url=REDDIT_URL):
     subreddit = random.choice(SUBREDDITS)
-    url       = url.format(subreddit)
+    #url       = 'https://www.reddit.com/r/catvideos/comments/ddkmu7/cat_videos/' #url.format(subreddit)
+    url       = 'https://reddit.com/r/Catvideos/.json?sort=top'
     response  = requests.get(url, headers=headers).json()
     data      = response['data']['children']
     images    = []
@@ -71,6 +76,9 @@ def handle_url(url=REDDIT_URL):
         title  = post['data']['title']
 
         images.append((url, source, title))
+
+    if source == 'youtube.com':
+        url = post['data']['secure_media_embed']['media_domain_url']
 
     img_url, img_source, img_title = random.choice(images)
     return dl_content(img_url, img_source, img_title)
@@ -106,7 +114,17 @@ def write_file(img_url, title):
     with iopen(fname, 'wb') as file:
         file.write(r.content)
 
+def get_yt(url):
+    os.remove('cat.mp4')
+    ydl_opts = {
+        'format': 'mp4',
+        'outtmpl': 'cat.mp4'
+    }
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        print(ydl.download([url]))
+
 '''Main Execution'''
 
-img, title = handle_url()
-write_file(img, title)
+#img, title = handle_url()
+handle_url()
+#write_file(img, title)
