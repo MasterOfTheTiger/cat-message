@@ -54,15 +54,14 @@ def dl_content(url, source, title):
         return img_url, title
 
     elif source == 'youtube.com':
-        get_yt(url)
+        return url, title
 
     else:
         return url, title
 
 def handle_url(url=REDDIT_URL):
     subreddit = random.choice(SUBREDDITS)
-    #url       = 'https://www.reddit.com/r/catvideos/comments/ddkmu7/cat_videos/' #url.format(subreddit)
-    url       = 'https://reddit.com/r/Catvideos/.json?sort=top'
+    url       = url.format(subreddit)
     response  = requests.get(url, headers=headers).json()
     data      = response['data']['children']
     images    = []
@@ -86,6 +85,11 @@ def handle_url(url=REDDIT_URL):
 def write_file(img_url, title):
     if not img_url:
         sys.stderr.write('Something went wrong - no url\n')
+        return
+
+    if img_url.split('www.youtube.com')[0] == "https://" or img_url.split('youtu.be')[0] == "https://":
+        print(title)
+        get_yt(img_url)
         return
 
     if 'v.redd.it' in img_url:
@@ -115,7 +119,8 @@ def write_file(img_url, title):
         file.write(r.content)
 
 def get_yt(url):
-    os.remove('cat.mp4')
+    os.unlink('cat.mp4')
+
     ydl_opts = {
         'format': 'mp4',
         'outtmpl': 'cat.mp4'
@@ -125,6 +130,5 @@ def get_yt(url):
 
 '''Main Execution'''
 
-#img, title = handle_url()
-handle_url()
-#write_file(img, title)
+img, title = handle_url()
+write_file(img, title)
