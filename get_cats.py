@@ -87,11 +87,6 @@ def write_file(img_url, title):
         sys.stderr.write('Something went wrong - no url\n')
         return
 
-    if img_url.split('www.youtube.com')[0] == "https://" or img_url.split('youtu.be')[0] == "https://":
-        print(title)
-        get_yt(img_url)
-        return
-
     if 'v.redd.it' in img_url:
         sys.stderr.write('''
         The source of this file is v.redd.it.
@@ -109,6 +104,11 @@ def write_file(img_url, title):
     for cat_file in glob.glob('cat*'):
         os.unlink(cat_file)
 
+    if img_url.split('www.youtube.com')[0] == "https://" or img_url.split('youtu.be')[0] == "https://":
+        print(title)
+        get_yt(img_url)
+        return
+
     fname = 'cat' + extension
     r = requests.get(img_url, stream=True)
 
@@ -119,8 +119,6 @@ def write_file(img_url, title):
         file.write(r.content)
 
 def get_yt(url):
-    os.unlink('cat.mp4')
-
     ydl_opts = {
         'format': 'mp4',
         'outtmpl': 'cat.mp4'
